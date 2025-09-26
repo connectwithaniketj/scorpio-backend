@@ -3,7 +3,7 @@ from app.services.scorpio_client import ScorpioClient
 
 router = APIRouter()
 
-@router.post("/")
+@router.post("")
 async def notify(request: Request):
     body = await request.json()
     print(" Notification received from Scorpio:")
