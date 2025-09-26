@@ -6,7 +6,7 @@ router = APIRouter()
 @router.post("/")
 async def notify(request: Request):
     body = await request.json()
-    print("📩 Notification received from Scorpio:")
+    print(" Notification received from Scorpio:")
     print(body)
     # You can add logic here (store in DB, trigger alert, etc.)
     return {"status": "received"}
