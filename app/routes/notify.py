@@ -10,3 +10,11 @@ async def notify(request: Request):
     print(body)
     # You can add logic here (store in DB, trigger alert, etc.)
     return {"status": "received"}
+
+@router.post("/location_change")
+async def location_change(request: Request):
+    body = await request.json()
+    print("📍 Location change received from Scorpio:")
+    print(body)
+    # You can add logic here (store in DB, trigger alert, etc.)
+    return {"status": "received"}
