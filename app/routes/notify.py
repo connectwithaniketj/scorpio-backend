@@ -18,3 +18,4 @@ async def location_change(request: Request):
     print(body)
     # You can add logic here (store in DB, trigger alert, etc.)
     return {"status": "received"}
+

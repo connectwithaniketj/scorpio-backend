@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vessel History</title>
+    <link rel="stylesheet" href="/static/leaflet.css"/>
+</head>
+<body>
+    <h1>Vessel History</h1>
+    <div id="map" style="height: 500px"></div>
+        <div id="coords" style="
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: white;
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    z-index: 1000;">
+    Lat: -, Lon: -
+    </div>
+
+    <script src="/static/leaflet.js"></script>
+    <script>
+        document.getElementById("coords").style.display = "block";
+        const vesselId = "{{ vessel_id }}";
+        const map = L.map('map').setView([20, 78], 4);
+        map.on("mousemove", function(e) {
+            document.getElementById("coords").innerText =
+                `Lat: ${e.latlng.lat.toFixed(5)}, Lon: ${e.latlng.lng.toFixed(5)}`;
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        fetch("/static/india-boundary.geojson")   // local file in your static folder
+        .then(response => {
+            if (!response.ok) throw new Error("Network error " + response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log("GeoJSON loaded:", data);
+
+            // Add GeoJSON layer to map
+            L.geoJSON(data, {
+            style: { color: "red", weight: 2 }
+            }).addTo(map);
+        })
+        .catch(err => console.error("Error loading GeoJSON:", err));
+
+        async function loadHistory() {
+            const url = `/entities/vessel/history?vessel_id=${encodeURIComponent(vesselId)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            console.log("Vessel history data:", data);
+
+            if (data.path && data.path.length > 0) {
+                const pathCoords = data.path.map(coords => [coords[1], coords[0]]);
+                L.polyline(pathCoords, { color: "blue" }).addTo(map);
+                map.fitBounds(pathCoords);
+
+                // Mark start & end points
+                L.marker(pathCoords[0]).addTo(map).bindPopup(vesselId).bindTooltip(vesselId, {permanent: false, direction: "top"});
+                L.marker(pathCoords[pathCoords.length-1]).addTo(map).bindPopup("start");
+            }
+        }
+
+        loadHistory();
+        setInterval(loadHistory, 30000);
+    </script>
+</body>
+</html>
